@@ -1,0 +1,6 @@
+fastapi
+uvicorn[standard]
+anthropic
+asyncpg
+pydantic
+python-multipart

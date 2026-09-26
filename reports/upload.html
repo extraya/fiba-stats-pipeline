@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upload Game Stat Sheet — UFE Basketball Analytics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #14161B; --bg-elevated: #1C1F26; --bg-card: #20232B;
+    --ink: #F3F4F6; --ink-dim: #8B93A1; --ink-faint: #545B68;
+    --accent: #FFC145; --pos: #6FCF97; --neg: #EB5757;
+    --hairline: rgba(255,255,255,0.08); --hairline-strong: rgba(255,255,255,0.16);
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--ink); font-family: 'IBM Plex Sans', sans-serif;
+    margin: 0; padding: 0 20px 80px; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 700px; margin: 0 auto; }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--accent); text-align: center; padding-top: 40px; margin-bottom: 6px;
+  }
+  .title {
+    font-family: 'Oswald', sans-serif; font-weight: 600; font-size: clamp(24px, 4vw, 32px);
+    text-align: center; margin: 0 0 10px;
+  }
+  .subtitle {
+    text-align: center; font-size: 14px; color: var(--ink-dim); line-height: 1.6;
+    max-width: 480px; margin: 0 auto;
+  }
+
+  /* ===== Drop zone ===== */
+  .dropzone {
+    margin-top: 40px;
+    position: relative;
+    border: 2px dashed var(--hairline-strong);
+    border-radius: 8px;
+    min-height: 260px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+    padding: 32px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    overflow: hidden;
+    background: var(--bg-elevated);
+  }
+  .dropzone.drag-over { border-color: var(--accent); background: rgba(255,193,69,0.06); }
+  .dropzone.has-image { padding: 0; cursor: default; }
+  .dz-icon { font-size: 32px; margin-bottom: 14px; opacity: 0.5; }
+  .dz-text { font-family: 'Oswald', sans-serif; font-size: 17px; color: var(--ink); margin-bottom: 6px; }
+  .dz-sub { font-size: 12.5px; color: var(--ink-faint); font-family: 'JetBrains Mono', monospace; }
+  input[type=file] { display: none; }
+
+  .preview-wrap { position: relative; width: 100%; }
+  .preview-img { width: 100%; display: block; max-height: 420px; object-fit: contain; background: #0A0B0E; }
+
+  /* scan-line animation */
+  .scan-overlay {
+    position: absolute; inset: 0; display: none;
+    background: linear-gradient(to bottom, transparent 0%, rgba(255,193,69,0.06) 100%);
+  }
+  .scan-overlay.active { display: block; }
+  .scan-line {
+    position: absolute; left: 0; right: 0; height: 3px;
+    background: linear-gradient(to right, transparent, var(--accent) 20%, var(--accent) 80%, transparent);
+    box-shadow: 0 0 16px 2px rgba(255,193,69,0.7);
+    animation: scan 1.6s ease-in-out infinite;
+  }
+  @keyframes scan {
+    0% { top: 0%; opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { top: 100%; opacity: 0; }
+  }
+  .scan-status {
+    position: absolute; bottom: 14px; left: 0; right: 0; text-align: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.06em;
+    color: var(--accent); text-transform: uppercase;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  }
+
+  /* ===== Result panel ===== */
+  .result-panel { margin-top: 24px; display: none; }
+  .result-panel.show { display: block; }
+
+  .result-card {
+    background: var(--bg-card); border: 1px solid var(--hairline); border-radius: 6px;
+    padding: 20px 22px;
+  }
+  .result-status {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 4px;
+    font-family: 'Oswald', sans-serif; font-size: 16px;
+  }
+  .status-dot { width: 9px; height: 9px; border-radius: 50%; }
+  .status-dot.ok { background: var(--pos); }
+  .status-dot.err { background: var(--neg); }
+  .result-detail {
+    font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: var(--ink-dim);
+    line-height: 1.6; margin-top: 10px;
+  }
+  .result-actions { margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn {
+    font-family: 'JetBrains Mono', monospace; font-size: 12.5px; letter-spacing: 0.03em;
+    padding: 10px 16px; border-radius: 4px; border: 1px solid var(--hairline-strong);
+    background: transparent; color: var(--ink); cursor: pointer; text-decoration: none;
+    display: inline-block; transition: border-color 0.15s, color 0.15s;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn.primary { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 700; }
+  .btn.primary:hover { opacity: 0.9; color: var(--bg); }
+
+  .config-note {
+    margin-top: 32px; font-size: 12px; color: var(--ink-faint);
+    font-family: 'JetBrains Mono', monospace; text-align: center; line-height: 1.7;
+  }
+  .config-note code {
+    background: var(--bg-elevated); padding: 1px 5px; border-radius: 3px; color: var(--ink-dim);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">UFE BASKETBALL ANALYTICS</div>
+  <div class="title">Upload a game stat sheet</div>
+  <div class="subtitle">Drop the official FIBA statistics sheet image below. It's extracted, checked against the sheet's own totals, and stored automatically.</div>
+
+  <div class="dropzone" id="dropzone">
+    <div class="dz-icon">⬆</div>
+    <div class="dz-text">Drag & drop an image here</div>
+    <div class="dz-sub">or click to browse · PNG or JPEG</div>
+    <input type="file" id="fileInput" accept="image/png,image/jpeg">
+  </div>
+
+  <div class="result-panel" id="resultPanel">
+    <div class="result-card" id="resultCard"></div>
+  </div>
+
+  <div class="config-note">
+    Calls <code id="api-endpoint-label">POST /games/upload</code> on the FastAPI backend.
+    Set the API base URL below if it isn't running on <code>localhost:8000</code>.
+  </div>
+</div>
+
+<script>
+const API_BASE = window.API_BASE_URL || 'http://localhost:8000';
+
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const resultPanel = document.getElementById('resultPanel');
+const resultCard = document.getElementById('resultCard');
+
+document.getElementById('api-endpoint-label').textContent = `POST ${API_BASE}/games/upload`;
+
+dropzone.addEventListener('click', () => { if (!dropzone.classList.contains('has-image')) fileInput.click(); });
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+dropzone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropzone.classList.remove('drag-over');
+  if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', e => {
+  if (e.target.files.length) handleFile(e.target.files[0]);
+});
+
+function handleFile(file) {
+  if (!['image/png', 'image/jpeg'].includes(file.type)) {
+    showResult(false, 'Unsupported file type', `Got "${file.type}" — upload a PNG or JPEG.`);
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    dropzone.classList.add('has-image');
+    dropzone.innerHTML = `
+      <div class="preview-wrap">
+        <img class="preview-img" src="${reader.result}" alt="Uploaded stat sheet">
+        <div class="scan-overlay active" id="scanOverlay">
+          <div class="scan-line"></div>
+          <div class="scan-status" id="scanStatus">Reading stat sheet…</div>
+        </div>
+      </div>`;
+    uploadFile(file);
+  };
+  reader.readAsDataURL(file);
+}
+
+async function uploadFile(file) {
+  resultPanel.classList.remove('show');
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const resp = await fetch(`${API_BASE}/games/upload`, { method: 'POST', body: formData });
+    const scanOverlay = document.getElementById('scanOverlay');
+    if (scanOverlay) scanOverlay.classList.remove('active');
+
+    if (resp.ok) {
+      const data = await resp.json();
+      showResult(true, 'Extraction validated',
+        `Game #${data.game_id} stored. ${data.validation_detail}`, data.game_id);
+    } else {
+      const err = await resp.json().catch(() => ({ detail: resp.statusText }));
+      showResult(false, `Upload failed (${resp.status})`, err.detail || 'Unknown error');
+    }
+  } catch (e) {
+    const scanOverlay = document.getElementById('scanOverlay');
+    if (scanOverlay) scanOverlay.classList.remove('active');
+    showResult(false, 'Could not reach the backend',
+      `${e.message} — is the FastAPI server running at ${API_BASE}?`);
+  }
+}
+
+function showResult(ok, title, detail, gameId) {
+  resultPanel.classList.add('show');
+  resultCard.innerHTML = `
+    <div class="result-status">
+      <span class="status-dot ${ok ? 'ok' : 'err'}"></span>
+      <span>${title}</span>
+    </div>
+    <div class="result-detail">${detail}</div>
+    ${ok ? `<div class="result-actions">
+      <a class="btn primary" href="game_report.html?game_id=${gameId}">View game report</a>
+      <a class="btn" href="#" onclick="location.reload(); return false;">Upload another</a>
+    </div>` : `<div class="result-actions">
+      <a class="btn" href="#" onclick="location.reload(); return false;">Try again</a>
+    </div>`}
+  `;
+}
+</script>
+</body>
+</html>

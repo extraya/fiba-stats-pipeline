@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCBA FINAL — МУИС Шонхорууд vs СЭЗИС</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #14161B;
+    --bg-elevated: #1C1F26;
+    --bg-card: #20232B;
+    --ink: #F3F4F6;
+    --ink-dim: #8B93A1;
+    --ink-faint: #545B68;
+    --accent: #FFC145;
+    --home: #FF6B5D;
+    --away: #5B9EFF;
+    --hairline: rgba(255,255,255,0.08);
+    --hairline-strong: rgba(255,255,255,0.14);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', sans-serif;
+    margin: 0;
+    padding: 0 20px 80px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 980px; margin: 0 auto; }
+
+  /* ===== Header ===== */
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    text-align: center;
+    padding-top: 40px;
+    margin-bottom: 6px;
+  }
+  .matchup-title {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: clamp(22px, 4vw, 34px);
+    text-align: center;
+    letter-spacing: 0.01em;
+    margin: 0 0 6px;
+    color: var(--ink);
+  }
+  .meta-line {
+    text-align: center;
+    font-size: 13px;
+    color: var(--ink-dim);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ===== Scoreboard hero ===== */
+  .scoreboard {
+    margin: 40px 0 8px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--hairline);
+    border-radius: 6px;
+    padding: 36px 24px 28px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 12px;
+  }
+  .sb-team { text-align: center; }
+  .sb-team-name {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 500;
+    font-size: clamp(14px, 2.4vw, 19px);
+    letter-spacing: 0.02em;
+    color: var(--ink-dim);
+    margin-bottom: 10px;
+  }
+  .sb-team.is-home .sb-team-name { color: var(--home); }
+  .sb-team.is-away .sb-team-name { color: var(--away); }
+  .sb-score {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: clamp(48px, 10vw, 84px);
+    line-height: 1;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .sb-dash {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(28px, 5vw, 44px);
+    color: var(--ink-faint);
+    padding-bottom: 6px;
+  }
+  .sb-win-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 8px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    display: inline-block;
+  }
+  .sb-win-tag.win { background: rgba(255,193,69,0.14); color: var(--accent); }
+  .sb-win-tag.loss { opacity: 0; }
+
+  .quarters {
+    margin-top: 28px;
+    display: grid;
+    grid-template-columns: 90px repeat(4, 1fr);
+    gap: 1px;
+    background: var(--hairline);
+    border: 1px solid var(--hairline);
+    border-radius: 4px;
+    overflow: hidden;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+  }
+  .q-cell { background: var(--bg-elevated); padding: 8px 6px; text-align: center; }
+  .q-cell.label { color: var(--ink-faint); font-size: 11px; text-align: left; padding-left: 12px; display:flex; align-items:center;}
+  .q-cell.header { color: var(--ink-faint); font-size: 11px; }
+  .q-cell.home-row { color: var(--home); font-weight: 500;}
+  .q-cell.away-row { color: var(--away); font-weight: 500;}
+
+  .venue-note {
+    text-align: center;
+    font-size: 12px;
+    color: var(--ink-faint);
+    font-family: 'JetBrains Mono', monospace;
+    margin-top: 14px;
+  }
+
+  /* ===== Section headers ===== */
+  .section { margin-top: 56px; }
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+  }
+  .section-title {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 500;
+    font-size: 20px;
+    letter-spacing: 0.01em;
+  }
+  .section-sub {
+    font-size: 13px;
+    color: var(--ink-dim);
+    margin-top: -14px;
+    margin-bottom: 22px;
+  }
+
+  /* ===== Efficiency comparison ===== */
+  .eff-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .eff-card {
+    background: var(--bg-card);
+    border: 1px solid var(--hairline);
+    border-radius: 6px;
+    padding: 18px 20px;
+  }
+  .eff-card .team-tag {
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.03em;
+    margin-bottom: 14px;
+  }
+  .eff-card.home .team-tag { color: var(--home); }
+  .eff-card.away .team-tag { color: var(--away); }
+  .eff-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 9px 0;
+    border-top: 1px solid var(--hairline);
+  }
+  .eff-row:first-of-type { border-top: none; }
+  .eff-label { font-size: 13px; color: var(--ink-dim); }
+  .eff-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 16px;
+  }
+  .eff-note {
+    grid-column: 1 / -1;
+    font-size: 12.5px;
+    color: var(--ink-dim);
+    background: var(--bg-card);
+    border: 1px solid var(--hairline);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    padding: 12px 16px;
+    line-height: 1.55;
+  }
+  .eff-note b { color: var(--ink); }
+
+  /* ===== Shooting split bars ===== */
+  .split-row { margin-bottom: 16px; }
+  .split-label {
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--ink-dim);
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .split-bar {
+    display: flex;
+    height: 22px;
+    border-radius: 3px;
+    overflow: hidden;
+    background: var(--bg-card);
+  }
+  .split-seg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--bg);
+    transition: width 1.1s cubic-bezier(.16,1,.3,1);
+  }
+  .split-seg.home { background: var(--home); }
+  .split-seg.away { background: var(--away); }
+
+  /* ===== Standouts ===== */
+  .standout-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+  }
+  .standout-card {
+    background: var(--bg-card);
+    border: 1px solid var(--hairline);
+    border-radius: 6px;
+    padding: 16px;
+  }
+  .standout-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 10px;
+  }
+  .standout-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 26px;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .standout-name {
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.3;
+  }
+  .standout-team {
+    font-size: 11px;
+    color: var(--ink-faint);
+    margin-top: 2px;
+  }
+  .dd-tag {
+    display: inline-block;
+    margin-top: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 3px;
+    padding: 2px 6px;
+  }
+
+  /* ===== Box score tables ===== */
+  .team-block { margin-bottom: 40px; }
+  .team-block-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .team-dot { width: 9px; height: 9px; border-radius: 50%; }
+  .team-dot.home { background: var(--home); }
+  .team-dot.away { background: var(--away); }
+  .team-block-name {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 500;
+    font-size: 17px;
+  }
+  .team-block-score {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--ink-dim);
+    font-size: 13px;
+  }
+
+  .box-scroll { overflow-x: auto; border: 1px solid var(--hairline); border-radius: 6px; }
+  table.box {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    min-width: 760px;
+  }
+  table.box th, table.box td {
+    padding: 8px 9px;
+    text-align: right;
+    white-space: nowrap;
+  }
+  table.box th {
+    background: var(--bg-elevated);
+    color: var(--ink-faint);
+    font-weight: 500;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    border-bottom: 1px solid var(--hairline-strong);
+    position: sticky; top: 0;
+  }
+  table.box td.name-cell, table.box th.name-cell { text-align: left; }
+  table.box td.name-cell { color: var(--ink); font-weight: 500; }
+  table.box tbody tr { border-bottom: 1px solid var(--hairline); }
+  table.box tbody tr:last-child { border-bottom: none; }
+  table.box tbody tr.starter td.name-cell::before {
+    content: "●";
+    color: var(--accent);
+    font-size: 7px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  table.box tbody tr.dnp td { color: var(--ink-faint); font-style: italic; }
+  table.box td.pts-cell { color: var(--accent); font-weight: 700; }
+  table.box td.pm-pos { color: #6FCF97; }
+  table.box td.pm-neg { color: #EB5757; }
+  table.box tfoot td {
+    background: var(--bg-elevated);
+    font-weight: 700;
+    color: var(--ink);
+    border-top: 1px solid var(--hairline-strong);
+  }
+
+  .legend {
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--ink-faint);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  footer {
+    margin-top: 64px;
+    padding-top: 20px;
+    border-top: 1px solid var(--hairline);
+    text-align: center;
+    font-size: 11.5px;
+    color: var(--ink-faint);
+    font-family: 'JetBrains Mono', monospace;
+    line-height: 1.7;
+  }
+
+  @media (max-width: 600px) {
+    .eff-grid { grid-template-columns: 1fr; }
+    .quarters { grid-template-columns: 60px repeat(4, 1fr); font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow" id="eyebrow-label">GAME REPORT</div>
+  <div class="matchup-title" id="matchup-title">—</div>
+  <div class="meta-line" id="meta-line"></div>
+
+  <div class="scoreboard">
+    <div class="sb-team is-home" id="sb-home-team">
+      <div class="sb-team-name" id="sb-home-name">—</div>
+      <div class="sb-win-tag" id="sb-home-tag"></div>
+    </div>
+    <div style="display:flex; align-items:baseline; gap:14px;">
+      <div class="sb-score" id="score-home">0</div>
+      <div class="sb-dash">–</div>
+      <div class="sb-score" id="score-away">0</div>
+    </div>
+    <div class="sb-team is-away" id="sb-away-team">
+      <div class="sb-team-name" id="sb-away-name">—</div>
+      <div class="sb-win-tag" id="sb-away-tag"></div>
+    </div>
+
+    <div class="quarters" style="grid-column: 1 / -1;" id="quarters-grid"></div>
+    <div class="venue-note" style="grid-column: 1 / -1;" id="venue-note"></div>
+  </div>
+
+  <!-- ===== EFFICIENCY ===== -->
+  <div class="section">
+    <div class="section-head"><span class="section-num">01</span><span class="section-title">Efficiency, not just shooting %</span></div>
+    <div class="section-sub">Calculated from the box score — effective FG%, true shooting%, and assist-to-turnover ratio.</div>
+    <div class="eff-grid" id="eff-grid"></div>
+  </div>
+
+  <!-- ===== SHOOTING SPLITS ===== -->
+  <div class="section">
+    <div class="section-head"><span class="section-num">02</span><span class="section-title">Shooting splits</span></div>
+    <div class="section-sub">Make % by shot type, both teams side by side.</div>
+    <div id="splits-container"></div>
+  </div>
+
+  <!-- ===== STANDOUTS ===== -->
+  <div class="section">
+    <div class="section-head"><span class="section-num">03</span><span class="section-title">Standout performers</span></div>
+    <div class="section-sub">Top of each stat category across both teams.</div>
+    <div class="standout-grid" id="standout-grid"></div>
+  </div>
+
+  <!-- ===== BOX SCORES ===== -->
+  <div class="section" id="box-scores">
+    <div class="section-head"><span class="section-num">04</span><span class="section-title">Full box score</span></div>
+    <div class="section-sub">● marks starters. Rows in italics did not play (DNP).</div>
+    <div id="box-score-container"></div>
+    <div class="legend">MIN minutes · FG/2P/3P field goals made-attempted · FT free throws · OR/DR/TR rebounds · AST assists · TO turnovers · STL steals · BLK blocks · PF fouls committed · +/- net points while on court</div>
+  </div>
+
+  <footer>
+    Source: FIBA Europe Stats Suite official statistics sheet, parsed automatically on upload.<br>
+    Effective FG%, true shooting%, and AST/TO are calculated fields — not present on the original sheet.
+  </footer>
+
+</div>
+
+<script>
+(async function main() {
+const SAMPLE_DATA = {"game_meta": {"game_no": "2026041503", "date": "2026-04-15", "time_local": "20:44", "venue": "M BANK ARENA", "competition": "MCBA FINAL", "final_score": {"home": 71, "away": 77}, "quarter_scores": {"home": [12, 19, 23, 17], "away": [20, 20, 18, 19]}}, "teams": [{"team_name": "\u041c\u0423\u0418\u0421 \u0428\u041e\u041d\u0425\u041e\u0420\u0423\u0423\u0414", "team_code": "NUM", "is_home": true, "players": [{"no": 1, "name": "\u0413\u0430\u043d\u0441\u04af\u0445 \u0411\u0410\u042f\u0420\u0416\u0410\u0412\u0425\u041b\u0410\u041d", "started": true, "min": "13:56", "dnp": false, "fg_m": 5, "fg_a": 5, "fg_pct": 100.0, "fg2_m": 5, "fg2_a": 5, "fg2_pct": 100.0, "fg3_m": 0, "fg3_a": 0, "fg3_pct": 0.0, "ft_m": 0, "ft_a": 0, "ft_pct": 0.0, "reb_o": 1, "reb_d": 2, "reb_tot": 3, "ast": 0, "to": 2, "stl": 0, "blk": 1, "pf_committed": 5, "pf_drawn": 2, "plus_minus": -6, "pts": 10}, {"no": 2, "name": "\u0411\u0430\u0442\u0431\u0430\u044f\u0440 \u0411\u0410\u0422\u041b\u0425\u0410\u0413\u0412\u0410", "started": true, "min": "19:28", "dnp": false, "fg_m": 1, "fg_a": 4, "fg_pct": 25.0, "fg2_m": 0, "fg2_a": 0, "fg2_pct": 0.0, "fg3_m": 1, "fg3_a": 4, "fg3_pct": 25.0, "ft_m": 0, "ft_a": 0, "ft_pct": 0.0, "reb_o": 0, "reb_d": 1, "reb_tot": 1, "ast": 0, "to": 1, "stl": 0, "blk": 0, "pf_committed": 4, "pf_drawn": 0, "plus_minus": 5, "pts": 3}, {"no": 3, "name": "\u0422\u043e\u0434\u0445\u04af\u04af \u0422\u04ae\u041c\u042d\u041d-\u04e8\u041b\u0417\u0418\u0419", "started": false, "min": null, "dnp": true, "fg_m": null, "fg_a": null, "fg_pct": null, "fg2_m": null, "fg2_a": null, "fg2_pct": null, "fg3_m": null, "fg3_a": null, "fg3_pct": null, "ft_m": null, "ft_a": null, "ft_pct": null, "reb_o": null, "reb_d": null, "reb_tot": null, "ast": null, "to": null, "stl": null, "blk": null, "pf_committed": null, "pf_drawn": null, "plus_minus": null, "pts": null}, {"no": 4, "name": "\u0410\u044e\u0443\u0448\u0431\u0430\u0430\u0442\u0430\u0440 \u042d\u0420\u0425\u042d\u041c\u0411\u0410\u042f\u0420", "started": false, "min": null, "dnp": true, "fg_m": null, "fg_a": null, "fg_pct": null, "fg2_m": null, "fg2_a": null, "fg2_pct": null, "fg3_m": null, "fg3_a": null, "fg3_pct": null, "ft_m": null, "ft_a": null, "ft_pct": null, "reb_o": null, "reb_d": null, "reb_tot": null, "ast": null, "to": null, "stl": null, "blk": null, "pf_committed": null, "pf_drawn": null, "plus_minus": null, "pts": null}, {"no": 5, "name": "\u0411\u0430\u0442\u0431\u0430\u044f\u0440 \u0421\u041e\u0414\u041c\u041e\u041d\u0413\u041e\u041b", "started": false, "min": null, "dnp": true, "fg_m": null, "fg_a": null, "fg_pct": null, "fg2_m": null, "fg2_a": null, "fg2_pct": null, "fg3_m": null, "fg3_a": null, "fg3_pct": null, "ft_m": null, "ft_a": null, "ft_pct": null, "reb_o": null, "reb_d": null, "reb_tot": null, "ast": null, "to": null, "stl": null, "blk": null, "pf_committed": null, "pf_drawn": null, "plus_minus": null, "pts": null}, {"no": 6, "name": "\u0411\u0443\u0434\u0445\u04af\u04af \u0422\u04e8\u0420\u0422\u0423\u041b\u0413\u0410", "started": false, "min": null, "dnp": true, "fg_m": null, "fg_a": null, "fg_pct": null, "fg2_m": null, "fg2_a": null, "fg2_pct": null, "fg3_m": null, "fg3_a": null, "fg3_pct": null, "ft_m": null, "ft_a": null, "ft_pct": null, "reb_o": null, "reb_d": null, "reb_tot": null, "ast": null, "to": null, "stl": null, "blk": null, "pf_committed": null, "pf_drawn": null, "plus_minus": null, "pts": null}, {"no": 8, "name": "\u0426\u043e\u0433\u043d\u044d\u043c\u044d\u0445 \u0411\u0410\u0422\u041c\u04e8\u041d\u0425", "started": false, "min": "21:18", "dnp": false, "fg_m": 1, "fg_a": 4, "fg_pct": 25.0, "fg2_m": 1, "fg2_a": 4, "fg2_pct": 25.0, "fg3_m": 0, "fg3_a": 0, "fg3_pct": 0.0, "ft_m": 0, "ft_a": 2, "ft_pct": 0.0, "reb_o": 0, "reb_d": 0, "reb_tot": 0, "ast": 2, "to": 3, "stl": 1, "blk": 0, "pf_committed": 2, "pf_drawn": 4, "plus_minus": -9, "pts": 2}, {"no": 9, "name": "\u0411\u0430\u044f\u0440\u0431\u0430\u0442 \u0422\u04e8\u0413\u04e8\u041b\u0414\u04e8\u0420", "started": true, "min": "28:28", "dnp": false, "fg_m": 7, "fg_a": 16, "fg_pct": 43.8, "fg2_m": 3, "fg2_a": 6, "fg2_pct": 50.0, "fg3_m": 4, "fg3_a": 10, "fg3_pct": 40.0, "ft_m": 4, "ft_a": 5, "ft_pct": 80.0, "reb_o": 2, "reb_d": 5, "reb_tot": 7, "ast": 2, "to": 5, "stl": 2, "blk": 0, "pf_committed": 5, "pf_drawn": 4, "plus_minus": -5, "pts": 22}, {"no": 10, "name": "\u0411\u0430\u0442-\u041e\u0447\u0438\u0440 \u0411\u0410\u0422-\u042f\u0410\u041b\u0422", "started": false, "min": "19:46", "dnp": false, "fg_m": 2, "fg_a": 7, "fg_pct": 28.6, "fg2_m": 2, "fg2_a": 5, "fg2_pct": 40.0, "fg3_m": 0, "fg3_a": 2, "fg3_pct": 0.0, "ft_m": 0, "ft_a": 1, "ft_pct": 0.0, "reb_o": 1, "reb_d": 3, "reb_tot": 4, "ast": 4, "to": 2, "stl": 1, "blk": 0, "pf_committed": 1, "pf_drawn": 1, "plus_minus": -4, "pts": 4}, {"no": 11, "name": "\u042d\u043d\u0445\u0431\u0430\u0442 \u0422\u042d\u041c\u04ae\u04ae\u0416\u0418\u041d", "started": true, "min": "28:29", "dnp": false, "fg_m": 3, "fg_a": 9, "fg_pct": 33.3, "fg2_m": 2, "fg2_a": 3, "fg2_pct": 66.7, "fg3_m": 1, "fg3_a": 6, "fg3_pct": 16.7, "ft_m": 0, "ft_a": 0, "ft_pct": 0.0, "reb_o": 2, "reb_d": 1, "reb_tot": 3, "ast": 6, "to": 3, "stl": 1, "blk": 0, "pf_committed": 1, "pf_drawn": 2, "plus_minus": -11, "pts": 7}, {"no": 13, "name": "\u041c\u044f\u0433\u043c\u0430\u0440\u0434\u0430\u0432\u0430\u0430 \u0414\u0410\u0412\u0410\u0410-\u042d\u0420\u0414\u042d\u041d\u042d", "started": false, "min": "10:20", "dnp": false, "fg_m": 1, "fg_a": 4, "fg_pct": 25.0, "fg2_m": 1, "fg2_a": 4, "fg2_pct": 25.0, "fg3_m": 0, "fg3_a": 0, "fg3_pct": 0.0, "ft_m": 0, "ft_a": 0, "ft_pct": 0.0, "reb_o": 4, "reb_d": 2, "reb_tot": 6, "ast": 1, "to": 3, "stl": 0, "blk": 0, "pf_committed": 3, "pf_drawn": 0, "plus_minus": 2, "pts": 2}, {"no": 14, "name": "\u041e\u0434\u0445\u04af\u04af \u0427\u0418\u041d\u0413\u04ae\u04ae\u041d", "started": false, "min": "11:31", "dnp": false, "fg_m": 2, "fg_a": 2, "fg_pct": 100.0, "fg2_m": 1, "fg2_a": 1, "fg2_pct": 100.0, "fg3_m": 1, "fg3_a": 1, "fg3_pct": 100.0, "ft_m": 0, "ft_a": 0, "ft_pct": 0.0, "reb_o": 1, "reb_d": 1, "reb_tot": 2, "ast": 0, "to": 1, "stl": 0, "blk": 0, "pf_committed": 3, "pf_drawn": 0, "plus_minus": 5, "pts": 5}, {"no": 18, "name": "\u0411\u0430\u043b\u0434\u043e\u0440\u0436 \u0411\u0423\u042f\u041d\u0422\u041e\u0413\u0422\u041e\u0425", "started": true, "min": "19:20", "dnp": false, "fg_m": 3, "fg_a": 5, "fg_pct": 60.0, "fg2_m": 3, "fg2_a": 5, "fg2_pct": 60.0, "fg3_m": 0, "fg3_a": 0, "fg3_pct": 0.0, "ft_m": 1, "ft_a": 4, "ft_pct": 25.0, "reb_o": 3, "reb_d": 5, "reb_tot": 8, "ast": 1, "to": 2, "stl": 0, "blk": 1, "pf_committed": 3, "pf_drawn": 2, "plus_minus": -15, "pts": 7}, {"no": 19, "name": "\u0416\u0430\u0440\u0433\u0430\u043b\u0431\u0430\u044f\u0440 \u0422\u042d\u041d\u04ae\u04ae\u041d", "started": false, "min": "25:19", "dnp": false, "fg_m": 3, "fg_a": 8, "fg_pct": 37.5, "fg2_m": 3, "fg2_a": 5, "fg2_pct": 60.0, "fg3_m": 0, "fg3_a": 3, "fg3_pct": 0.0, "ft_m": 3, "ft_a": 7, "ft_pct": 42.9, "reb_o": 3, "reb_d": 5, "reb_tot": 8, "ast": 0, "to": 5, "stl": 3, "blk": 2, "pf_committed": 4, "pf_drawn": 4, "plus_minus": 10, "pts": 9}, {"no": 44, "name": "\u0413\u0430\u043d\u0446\u043e\u043b\u043c\u043e\u043d \u0411\u0410\u0422-\u042d\u0420\u0414\u042d\u041d\u042d", "started": false, "min": "02:05", "dnp": false, "fg_m": 0, "fg_a": 1, "fg_pct": 0.0, "fg2_m": 0, "fg2_a": 0, "fg2_pct": 0.0, "fg3_m": 0, "fg3_a": 1, "fg3_pct": 0.0, "ft_m": 0, "ft_a": 0, "ft_pct": 0.0, "reb_o": 0, "reb_d": 1, "reb_tot": 1, "ast": 0, "to": 0, "stl": 0, "blk": 0, "pf_committed": 0, "pf_drawn": 0, "plus_minus": -2, "pts": 0}], "team_totals": {"fg_m": 28, "fg_a": 65, "fg_pct": 43.1, "fg2_m": 21, "fg2_a": 38, "fg2_pct": 55.3, "fg3_m": 7, "fg3_a": 27, "fg3_pct": 25.9, "ft_m": 8, "ft_a": 19, "ft_pct": 42.1, "reb_o": 18, "reb_d": 29, "reb_tot": 47, "ast": 16, "to": 27, "stl": 8, "blk": 4, "pf_committed": 31, "pf_drawn": 19, "pts": 71}, "extra": {"points_from_turnovers": 13, "points_in_paint": 34, "biggest_lead": 4, "biggest_run": "9-0 (40-42)"}}, {"team_name": "\u0421\u042d\u0417\u0418\u0421", "team_code": "UFE", "is_home": false, "players": [{"no": 1, "name": "\u0422\u0443\u044f\u0430\u0431\u0430\u0430\u0442\u0430\u0440 \u0414\u0410\u0412\u0410\u0410\u0416\u0410\u0420\u0413\u0410\u041b", "started": false, "min": "22:38", "dnp": false, "fg_m": 3, "fg_a": 7, "fg_pct": 42.9, "fg2_m": 3, "fg2_a": 4, "fg2_pct": 75.0, "fg3_m": 0, "fg3_a": 3, "fg3_pct": 0.0, "ft_m": 3, "ft_a": 4, "ft_pct": 75.0, "reb_o": 1, "reb_d": 3, "reb_tot": 4, "ast": 2, "to": 4, "stl": 1, "blk": 0, "pf_committed": 3, "pf_drawn": 3, "plus_minus": -6, "pts": 9}, {"no": 3, "name": "\u041c\u04e9\u043d\u0445-\u041e\u0447\u0438\u0440 \u042d\u041d\u0425\u041c\u042d\u041d\u0414", "started": true, "min": "35:34", "dnp": false, "fg_m": 3, "fg_a": 9, "fg_pct": 33.3, "fg2_m": 2, "fg2_a": 7, "fg2_pct": 28.6, "fg3_m": 1, "fg3_a": 2, "fg3_pct": 50.0, "ft_m": 3, "ft_a": 6, "ft_pct": 50.0, "reb_o": 2, "reb_d": 5, "reb_tot": 7, "ast": 1, "to": 4, "stl": 3, "blk": 3, "pf_committed": 3, "pf_drawn": 5, "plus_minus": 4, "pts": 10}, {"no": 4, "name": "\u0410\u043c\u0430\u0440\u0431\u0430\u044f\u0440 \u0418\u0414\u042d\u0420\u0426\u042d\u041d\u0413\u042d\u041b", "started": false, "min": "05:00", "dnp": false, "fg_m": 0, "fg_a": 0, "fg_pct": 0.0, "fg2_m": 0, "fg2_a": 0, "fg2_pct": 0.0, "fg3_m": 0, "fg3_a": 0, "fg3_pct": 0.0, "ft_m": 0, "ft_a": 0, "ft_pct": 0.0, "reb_o": 0, "reb_d": 1, "reb_tot": 1, "ast": 0, "to": 0, "stl": 0, "blk": 0, "pf_committed": 2, "pf_drawn": 0, "plus_minus": 1, "pts": 0}, {"no": 5, "name": "\u0411\u0430\u044f\u043d\u0442\u04e9\u0440 \u04e8\u0421\u04e8\u0425\u0411\u0410\u042f\u0420", "started": false, "min": null, "dnp": true, "fg_m": null, "fg_a": null, "fg_pct": null, "fg2_m": null, "fg2_a": null, "fg2_pct": null, "fg3_m": null, "fg3_a": null, "fg3_pct": null, "ft_m": null, "ft_a": null, "ft_pct": null, "reb_o": null, "reb_d": null, "reb_tot": null, "ast": null, "to": null, "stl": null, "blk": null, "pf_committed": null, "pf_drawn": null, "plus_minus": null, "pts": null}, {"no": 8, "name": "\u041c\u04e9\u043d\u0445-\u042d\u0440\u0434\u044d\u043d\u044d \u0426\u042d\u041b\u041c\u042d\u0413", "started": true, "min": "36:39", "dnp": false, "fg_m": 6, "fg_a": 9, "fg_pct": 66.7, "fg2_m": 5, "fg2_a": 7, "fg2_pct": 71.4, "fg3_m": 1, "fg3_a": 2, "fg3_pct": 50.0, "ft_m": 7, "ft_a": 9, "ft_pct": 77.8, "reb_o": 5, "reb_d": 5, "reb_tot": 10, "ast": 1, "to": 1, "stl": 1, "blk": 0, "pf_committed": 4, "pf_drawn": 8, "plus_minus": 13, "pts": 20}, {"no": 9, "name": "\u0427\u0438\u043d\u0433\u04af\u043d\u0436\u0430\u0432 \u0427\u0418\u041d-\u042d\u0420\u0414\u042d\u041d\u042d", "started": false, "min": "06:00", "dnp": false, "fg_m": 0, "fg_a": 1, "fg_pct": 0.0, "fg2_m": 0, "fg2_a": 1, "fg2_pct": 0.0, "fg3_m": 0, "fg3_a": 0, "fg3_pct": 0.0, "ft_m": 1, "ft_a": 2, "ft_pct": 50.0, "reb_o": 0, "reb_d": 0, "reb_tot": 0, "ast": 0, "to": 0, "stl": 0, "blk": 0, "pf_committed": 2, "pf_drawn": 1, "plus_minus": -9, "pts": 1}, {"no": 10, "name": "\u042d\u0440\u0434\u044d\u043d\u044d\u0431\u0430\u0442 \u0427\u0418\u041d\u0413\u04ae\u04ae\u041d", "started": false, "min": null, "dnp": true, "fg_m": null, "fg_a": null, "fg_pct": null, "fg2_m": null, "fg2_a": null, "fg2_pct": null, "fg3_m": null, "fg3_a": null, "fg3_pct": null, "ft_m": null, "ft_a": null, "ft_pct": null, "reb_o": null, "reb_d": null, "reb_tot": null, "ast": null, "to": null, "stl": null, "blk": null, "pf_committed": null, "pf_drawn": null, "plus_minus": null, "pts": null}, {"no": 11, "name": "\u0427\u0443\u043b\u0443\u0443\u043d\u0431\u0430\u0430\u0442\u0430\u0440 \u0425\u042d\u0420\u041b\u042d\u041d", "started": false, "min": null, "dnp": true, "fg_m": null, "fg_a": null, "fg_pct": null, "fg2_m": null, "fg2_a": null, "fg2_pct": null, "fg3_m": null, "fg3_a": null, "fg3_pct": null, "ft_m": null, "ft_a": null, "ft_pct": null, "reb_o": null, "reb_d": null, "reb_tot": null, "ast": null, "to": null, "stl": null, "blk": null, "pf_committed": null, "pf_drawn": null, "plus_minus": null, "pts": null}, {"no": 12, "name": "\u0414\u0430\u0432\u0430\u0430\u0445\u04af\u04af \u0411\u0410\u0422-\u041e\u0420\u0413\u0418\u041b", "started": false, "min": null, "dnp": true, "fg_m": null, "fg_a": null, "fg_pct": null, "fg2_m": null, "fg2_a": null, "fg2_pct": null, "fg3_m": null, "fg3_a": null, "fg3_pct": null, "ft_m": null, "ft_a": null, "ft_pct": null, "reb_o": null, "reb_d": null, "reb_tot": null, "ast": null, "to": null, "stl": null, "blk": null, "pf_committed": null, "pf_drawn": null, "plus_minus": null, "pts": null}, {"no": 13, "name": "\u041e\u044e\u0443\u043d\u0431\u0430\u0442 \u0410\u0420\u0418\u0413\u0423\u041d", "started": false, "min": null, "dnp": true, "fg_m": null, "fg_a": null, "fg_pct": null, "fg2_m": null, "fg2_a": null, "fg2_pct": null, "fg3_m": null, "fg3_a": null, "fg3_pct": null, "ft_m": null, "ft_a": null, "ft_pct": null, "reb_o": null, "reb_d": null, "reb_tot": null, "ast": null, "to": null, "stl": null, "blk": null, "pf_committed": null, "pf_drawn": null, "plus_minus": null, "pts": null}, {"no": 14, "name": "\u041d\u043e\u043c\u0447\u0431\u0430\u0430\u0442\u0430\u0440 \u041d\u0410\u0420\u0410\u041d\u0411\u0410\u0410\u0422\u0410\u0420", "started": true, "min": "39:32", "dnp": false, "fg_m": 3, "fg_a": 12, "fg_pct": 25.0, "fg2_m": 3, "fg2_a": 7, "fg2_pct": 42.9, "fg3_m": 0, "fg3_a": 5, "fg3_pct": 0.0, "ft_m": 6, "ft_a": 11, "ft_pct": 54.5, "reb_o": 3, "reb_d": 5, "reb_tot": 8, "ast": 9, "to": 5, "stl": 3, "blk": 0, "pf_committed": 2, "pf_drawn": 10, "plus_minus": 4, "pts": 12}, {"no": 17, "name": "\u0413\u0430\u043d\u0442\u0443\u043b\u0433\u0430 \u0421\u0423\u041c\u042c\u042f\u0410\u0411\u0410\u0417\u0410\u0420", "started": true, "min": "16:36", "dnp": false, "fg_m": 2, "fg_a": 8, "fg_pct": 25.0, "fg2_m": 1, "fg2_a": 5, "fg2_pct": 20.0, "fg3_m": 1, "fg3_a": 3, "fg3_pct": 33.3, "ft_m": 0, "ft_a": 0, "ft_pct": 0.0, "reb_o": 2, "reb_d": 1, "reb_tot": 3, "ast": 0, "to": 0, "stl": 1, "blk": 0, "pf_committed": 0, "pf_drawn": 2, "plus_minus": 2, "pts": 5}, {"no": 24, "name": "\u0413\u04af\u0440\u0441\u043e\u0440\u043e\u043d\u0437\u043e\u043d \u04e8\u041d\u04e8\u0411\u041e\u041b\u0414", "started": true, "min": "31:44", "dnp": false, "fg_m": 6, "fg_a": 13, "fg_pct": 46.2, "fg2_m": 2, "fg2_a": 4, "fg2_pct": 50.0, "fg3_m": 4, "fg3_a": 9, "fg3_pct": 44.4, "ft_m": 4, "ft_a": 5, "ft_pct": 80.0, "reb_o": 0, "reb_d": 2, "reb_tot": 2, "ast": 2, "to": 1, "stl": 5, "blk": 0, "pf_committed": 2, "pf_drawn": 4, "plus_minus": 19, "pts": 20}], "team_totals": {"fg_m": 23, "fg_a": 59, "fg_pct": 39.0, "fg2_m": 16, "fg2_a": 35, "fg2_pct": 45.7, "fg3_m": 7, "fg3_a": 24, "fg3_pct": 29.2, "ft_m": 24, "ft_a": 37, "ft_pct": 64.9, "reb_o": 13, "reb_d": 25, "reb_tot": 38, "ast": 15, "to": 15, "stl": 14, "blk": 3, "pf_committed": 20, "pf_drawn": 31, "pts": 77}, "extra": {"points_from_turnovers": 19, "points_in_paint": 30, "biggest_lead": 15, "biggest_run": "10-0 (17-32)"}}]}
+;
+const API_BASE = window.API_BASE_URL || 'http://localhost:8000';
+
+// If a ?game_id=N param is present, fetch that game from the live backend
+// (as written by the upload pipeline) and reshape it into the same JSON
+// shape SAMPLE_DATA uses, so the rest of this script doesn't need to care
+// which source the data came from. Falls back to the embedded sample game
+// if no game_id is given, or if the fetch fails.
+async function loadGameData() {
+  const params = new URLSearchParams(window.location.search);
+  const gameId = params.get('game_id');
+  if (!gameId) return SAMPLE_DATA;
+
+  try {
+    const resp = await fetch(`${API_BASE}/games/${gameId}`);
+    if (!resp.ok) throw new Error(`Backend returned ${resp.status}`);
+    const raw = await resp.json();
+    return reshapeBackendGame(raw);
+  } catch (e) {
+    console.warn('Falling back to sample data — could not load game from backend:', e);
+    return SAMPLE_DATA;
+  }
+}
+
+function reshapeBackendGame(raw) {
+  const { game, players, totals } = raw;
+  const teamsMeta = [
+    { team_id: game.home_team_id, team_name: game.home_name, team_code: game.home_code, is_home: true },
+    { team_id: game.away_team_id, team_name: game.away_name, team_code: game.away_code, is_home: false },
+  ];
+
+  const teams = teamsMeta.map(tm => {
+    const teamPlayers = players
+      .filter(p => p.team_id === tm.team_id)
+      .map(p => ({
+        no: p.jersey_no, name: p.name, started: p.started, dnp: p.dnp,
+        min: p.minutes_played ? formatInterval(p.minutes_played) : null,
+        fg_m: p.fg_m, fg_a: p.fg_a, fg_pct: p.fg_pct,
+        fg2_m: p.fg2_m, fg2_a: p.fg2_a, fg2_pct: p.fg2_pct,
+        fg3_m: p.fg3_m, fg3_a: p.fg3_a, fg3_pct: p.fg3_pct,
+        ft_m: p.ft_m, ft_a: p.ft_a, ft_pct: p.ft_pct,
+        reb_o: p.reb_o, reb_d: p.reb_d, reb_tot: p.reb_tot,
+        ast: p.ast, to: p.to, stl: p.stl, blk: p.blk,
+        pf_committed: p.pf_committed, pf_drawn: p.pf_drawn,
+        plus_minus: p.plus_minus, pts: p.pts,
+      }));
+    const t = totals.find(t => t.team_id === tm.team_id) || {};
+    return {
+      team_name: tm.team_name, team_code: tm.team_code, is_home: tm.is_home,
+      players: teamPlayers,
+      team_totals: t,
+      extra: {
+        points_from_turnovers: t.points_from_turnovers, points_in_paint: t.points_in_paint,
+        biggest_lead: t.biggest_lead, biggest_run: t.biggest_run,
+      },
+    };
+  });
+
+  return {
+    game_meta: {
+      game_no: game.game_no, date: game.game_date, venue: game.venue,
+      competition: game.competition,
+      final_score: { home: game.home_score, away: game.away_score },
+      quarter_scores: { home: game.home_q_scores, away: game.away_q_scores },
+    },
+    teams,
+  };
+}
+
+function formatInterval(pgInterval) {
+  // asyncpg returns Postgres INTERVAL as an object like {minutes: 13, seconds: 56}
+  const m = pgInterval.minutes || 0, s = pgInterval.seconds || 0;
+  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+const data = await loadGameData();
+const homeTeam = data.teams.find(t => t.is_home);
+const awayTeam = data.teams.find(t => !t.is_home);
+
+// ---- populate header, scoreboard, quarters ----
+document.getElementById('eyebrow-label').textContent =
+  `${data.game_meta.competition || 'GAME REPORT'} · GAME NO. ${data.game_meta.game_no || '—'}`;
+document.getElementById('matchup-title').textContent = `${homeTeam.team_name} vs ${awayTeam.team_name}`;
+document.getElementById('meta-line').textContent = `${data.game_meta.venue || ''} · ${data.game_meta.date || ''}`;
+document.getElementById('sb-home-name').textContent = homeTeam.team_name;
+document.getElementById('sb-away-name').textContent = awayTeam.team_name;
+
+const homeWon = data.game_meta.final_score.home > data.game_meta.final_score.away;
+document.getElementById('sb-home-tag').textContent = homeWon ? 'WINNER' : 'FINAL';
+document.getElementById('sb-home-tag').className = 'sb-win-tag ' + (homeWon ? 'win' : 'loss');
+document.getElementById('sb-away-tag').textContent = homeWon ? 'FINAL' : 'WINNER';
+document.getElementById('sb-away-tag').className = 'sb-win-tag ' + (homeWon ? 'loss' : 'win');
+
+const qHome = data.game_meta.quarter_scores.home, qAway = data.game_meta.quarter_scores.away;
+document.getElementById('quarters-grid').innerHTML = `
+  <div class="q-cell label"></div>
+  <div class="q-cell header">Q1</div><div class="q-cell header">Q2</div>
+  <div class="q-cell header">Q3</div><div class="q-cell header">Q4</div>
+  <div class="q-cell label">${homeTeam.team_code || 'HOME'}</div>
+  ${qHome.map(v => `<div class="q-cell home-row">${v}</div>`).join('')}
+  <div class="q-cell label">${awayTeam.team_code || 'AWAY'}</div>
+  ${qAway.map(v => `<div class="q-cell away-row">${v}</div>`).join('')}
+`;
+document.getElementById('venue-note').textContent =
+  `Biggest lead — ${homeTeam.team_code} ${homeTeam.extra?.biggest_lead ?? '—'} · ${awayTeam.team_code} ${awayTeam.extra?.biggest_lead ?? '—'}` +
+  `  |  Biggest run — ${homeTeam.team_code} ${homeTeam.extra?.biggest_run ?? '—'} · ${awayTeam.team_code} ${awayTeam.extra?.biggest_run ?? '—'}`;
+
+// ---- calculated efficiency stats ----
+function calcEfficiency(t) {
+  const tot = t.team_totals;
+  const efg = ((tot.fg_m + 0.5 * tot.fg3_m) / tot.fg_a * 100);
+  const ts = (tot.pts / (2 * (tot.fg_a + 0.44 * tot.ft_a)) * 100);
+  const astTo = tot.to ? (tot.ast / tot.to) : null;
+  return { efg: efg.toFixed(1), ts: ts.toFixed(1), astTo: astTo !== null ? astTo.toFixed(2) : '—' };
+}
+const homeEff = calcEfficiency(homeTeam), awayEff = calcEfficiency(awayTeam);
+
+function effCard(team, eff, cls) {
+  return `<div class="eff-card ${cls}">
+    <div class="team-tag">${team.team_name}</div>
+    <div class="eff-row"><span class="eff-label">Effective FG%</span><span class="eff-value">${eff.efg}%</span></div>
+    <div class="eff-row"><span class="eff-label">True shooting%</span><span class="eff-value">${eff.ts}%</span></div>
+    <div class="eff-row"><span class="eff-label">Assist / Turnover</span><span class="eff-value">${eff.astTo}</span></div>
+  </div>`;
+}
+
+function buildEffNote() {
+  const winner = homeWon ? homeTeam : awayTeam;
+  const winnerEff = homeWon ? homeEff : awayEff;
+  const loserEff = homeWon ? awayEff : homeEff;
+  const loser = homeWon ? awayTeam : homeTeam;
+  const winnerLowerEfg = parseFloat(winnerEff.efg) < parseFloat(loserEff.efg);
+  if (winnerLowerEfg) {
+    return `<b>${winner.team_name} won despite a lower effective FG% (${winnerEff.efg}% vs ${loserEff.efg}%).</b>
+      True shooting — which credits free-throw efficiency — narrows or flips that picture:
+      ${winner.team_name} finished at ${winnerEff.ts}% true shooting vs ${loser.team_name}'s ${loserEff.ts}%,
+      with an assist-to-turnover ratio of ${winnerEff.astTo} against ${loserEff.astTo}.`;
+  }
+  return `<b>${winner.team_name} won with the better effective FG% (${winnerEff.efg}% vs ${loserEff.efg}%)</b>
+    and a true shooting% of ${winnerEff.ts}% vs ${loser.team_name}'s ${loserEff.ts}%,
+    backed by an assist-to-turnover ratio of ${winnerEff.astTo} against ${loserEff.astTo}.`;
+}
+
+document.getElementById('eff-grid').innerHTML =
+  effCard(homeTeam, homeEff, 'home') + effCard(awayTeam, awayEff, 'away') +
+  `<div class="eff-note">${buildEffNote()}</div>`;
+
+// ---- shooting splits ----
+function splitRow(label, homeVal, awayVal, homeCode, awayCode) {
+  return `<div class="split-row">
+    <div class="split-label"><span>${label}</span><span style="color:var(--ink-faint)">${homeCode} ${homeVal}% · ${awayCode} ${awayVal}%</span></div>
+    <div class="split-bar">
+      <div class="split-seg home" style="width:${homeVal}%">${homeVal}%</div>
+      <div class="split-seg away" style="width:${awayVal}%">${awayVal}%</div>
+    </div>
+  </div>`;
+}
+document.getElementById('splits-container').innerHTML =
+  splitRow('2-Point FG%', homeTeam.team_totals.fg2_pct, awayTeam.team_totals.fg2_pct, homeTeam.team_code, awayTeam.team_code) +
+  splitRow('3-Point FG%', homeTeam.team_totals.fg3_pct, awayTeam.team_totals.fg3_pct, homeTeam.team_code, awayTeam.team_code) +
+  splitRow('Free Throw %', homeTeam.team_totals.ft_pct, awayTeam.team_totals.ft_pct, homeTeam.team_code, awayTeam.team_code);
+
+// ---- standout performers ----
+const allPlayers = [];
+data.teams.forEach(t => t.players.forEach(p => {
+  if (!p.dnp) allPlayers.push({ ...p, team_name: t.team_name });
+}));
+
+function topBy(key) {
+  return allPlayers.reduce((best, p) => (p[key] !== null && (!best || p[key] > best[key])) ? p : best, null);
+}
+function isDoubleDouble(p) {
+  const cats = [p.pts, p.reb_tot, p.ast, p.stl, p.blk];
+  return cats.filter(c => c !== null && c >= 10).length >= 2;
+}
+
+const standouts = [
+  { label: 'Points', key: 'pts', player: topBy('pts') },
+  { label: 'Rebounds', key: 'reb_tot', player: topBy('reb_tot') },
+  { label: 'Assists', key: 'ast', player: topBy('ast') },
+  { label: 'Steals', key: 'stl', player: topBy('stl') },
+  { label: 'Best +/-', key: 'plus_minus', player: topBy('plus_minus') },
+].filter(s => s.player);
+
+document.getElementById('standout-grid').innerHTML = standouts.map(s => {
+  const p = s.player;
+  const val = s.key === 'plus_minus' ? (p[s.key] > 0 ? '+' : '') + p[s.key] : p[s.key];
+  const dd = isDoubleDouble(p) ? `<div class="dd-tag">DOUBLE-DOUBLE · ${p.pts} PTS</div>` : '';
+  return `<div class="standout-card">
+    <div class="standout-label">${s.label}</div>
+    <div class="standout-value">${val}</div>
+    <div class="standout-name">${p.name}</div>
+    <div class="standout-team">${p.team_name}</div>
+    ${dd}
+  </div>`;
+}).join('');
+
+// ---- animate scoreboard digits ----
+function animateCount(el, target, duration=900) {
+  const start = performance.now();
+  function tick(now) {
+    const p = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(eased * target);
+    if (p < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+animateCount(document.getElementById('score-home'), data.game_meta.final_score.home);
+animateCount(document.getElementById('score-away'), data.game_meta.final_score.away);
+
+// ---- build box score tables ----
+const cols = [
+  ['no','No'], ['name','Player'], ['min','Min'],
+  ['fg','FG'], ['fg2','2P'], ['fg3','3P'], ['ft','FT'],
+  ['reb_o','OR'], ['reb_d','DR'], ['reb_tot','TR'],
+  ['ast','AST'], ['to','TO'], ['stl','STL'], ['blk','BLK'],
+  ['pf_committed','PF'], ['plus_minus','+/-'], ['pts','PTS']
+];
+
+function fmtMA(m, a) {
+  if (m === null || a === null) return '—';
+  return m + '/' + a;
+}
+
+function renderTeam(team, teamCls) {
+  const container = document.createElement('div');
+  container.className = 'team-block';
+
+  const head = document.createElement('div');
+  head.className = 'team-block-head';
+  head.innerHTML = `<span class="team-dot ${teamCls}"></span>
+    <span class="team-block-name">${team.team_name}</span>
+    <span class="team-block-score">${team.team_totals.pts} PTS · ${team.team_totals.fg_pct}% FG</span>`;
+  container.appendChild(head);
+
+  const scroll = document.createElement('div');
+  scroll.className = 'box-scroll';
+  const table = document.createElement('table');
+  table.className = 'box';
+
+  const thead = document.createElement('thead');
+  thead.innerHTML = '<tr>' + cols.map(([k,label]) =>
+    `<th class="${k==='name' ? 'name-cell' : ''}">${label}</th>`).join('') + '</tr>';
+  table.appendChild(thead);
+
+  const tbody = document.createElement('tbody');
+  team.players.forEach(p => {
+    const tr = document.createElement('tr');
+    tr.className = (p.started ? 'starter ' : '') + (p.dnp ? 'dnp' : '');
+    if (p.dnp) {
+      tr.innerHTML = `<td>${p.no}</td><td class="name-cell">${p.name}</td>
+        <td colspan="14" style="text-align:left; color:var(--ink-faint);">DNP</td>`;
+    } else {
+      const pmClass = p.plus_minus > 0 ? 'pm-pos' : (p.plus_minus < 0 ? 'pm-neg' : '');
+      tr.innerHTML = `
+        <td>${p.no}</td>
+        <td class="name-cell">${p.name}</td>
+        <td>${p.min}</td>
+        <td>${fmtMA(p.fg_m,p.fg_a)}</td>
+        <td>${fmtMA(p.fg2_m,p.fg2_a)}</td>
+        <td>${fmtMA(p.fg3_m,p.fg3_a)}</td>
+        <td>${fmtMA(p.ft_m,p.ft_a)}</td>
+        <td>${p.reb_o}</td><td>${p.reb_d}</td><td>${p.reb_tot}</td>
+        <td>${p.ast}</td><td>${p.to}</td><td>${p.stl}</td><td>${p.blk}</td>
+        <td>${p.pf_committed}</td>
+        <td class="${pmClass}">${p.plus_minus > 0 ? '+' : ''}${p.plus_minus}</td>
+        <td class="pts-cell">${p.pts}</td>`;
+    }
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+
+  const t = team.team_totals;
+  const tfoot = document.createElement('tfoot');
+  tfoot.innerHTML = `<tr>
+    <td colspan="3">TOTALS</td>
+    <td>${fmtMA(t.fg_m,t.fg_a)}</td>
+    <td>${fmtMA(t.fg2_m,t.fg2_a)}</td>
+    <td>${fmtMA(t.fg3_m,t.fg3_a)}</td>
+    <td>${fmtMA(t.ft_m,t.ft_a)}</td>
+    <td>${t.reb_o}</td><td>${t.reb_d}</td><td>${t.reb_tot}</td>
+    <td>${t.ast}</td><td>${t.to}</td><td>${t.stl}</td><td>${t.blk}</td>
+    <td>${t.pf_committed}</td><td></td>
+    <td class="pts-cell">${t.pts}</td>
+  </tr>`;
+  table.appendChild(tfoot);
+
+  scroll.appendChild(table);
+  container.appendChild(scroll);
+  return container;
+}
+
+const boxContainer = document.getElementById('box-score-container');
+boxContainer.appendChild(renderTeam(data.teams.find(t => t.is_home), 'home'));
+boxContainer.appendChild(renderTeam(data.teams.find(t => !t.is_home), 'away'));
+
+})();
+</script>
+</body>
+</html>
