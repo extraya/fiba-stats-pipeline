@@ -63,7 +63,7 @@ backend/
   main.py               # FastAPI app: /games/upload, /games/{id}, /seasons/{season}/players
   schema.sql             # Postgres schema + example season-aggregate queries
   requirements.txt
-reports/
+docs/
   upload.html          # drag-and-drop upload UI, calls the backend directly
   game_report.html      # single-game report (box score, quarter scoring, advanced stats)
   season_view.html      # season leaderboard + trend charts
@@ -83,7 +83,7 @@ psql $DATABASE_URL -f schema.sql
 uvicorn main:app --reload
 ```
 
-Then open `reports/upload.html` in a browser (backend defaults to
+Then open `docs/upload.html` in a browser (backend defaults to
 `http://localhost:8000` — override with `window.API_BASE_URL` if different).
 
 ## Data integrity note
